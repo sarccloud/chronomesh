@@ -1,0 +1,19 @@
+@startuml
+' Component Diagram for the system with Chronomesh Client, Cloudflare, and Circuit Breaker
+
+package "Chronomesh System" {
+    [ProxyController] <<Component>>
+    [AppConfig] <<Component>>
+    [Circuit Breaker] <<Component>>
+}
+
+[Chronomesh Client] --> [ProxyController] : uses
+[ProxyController] --> [Circuit Breaker] : monitors
+[ProxyController] --> [Cloudflare Service] : forwards requests
+[Cloudflare Service] --> [OpenSARC System] : accesses
+
+note bottom of [Chronomesh System]
+  Created by: marco.mangan@pucrs.br
+end note
+
+@enduml
