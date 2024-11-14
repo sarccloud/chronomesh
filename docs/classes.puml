@@ -1,0 +1,26 @@
+@startuml
+' Class Diagram for the system
+
+class ProxyController {
+    - restTemplate : RestTemplate
+    + forwardRequest(year, period, id) : ResponseEntity
+    + handleOpenSarcError(year, period, id, ex) : ResponseEntity
+}
+
+class AppConfig {
+    + restTemplate() : RestTemplate
+}
+
+class RestTemplate
+class ResponseEntity
+
+AppConfig --> RestTemplate : creates
+ProxyController --> RestTemplate : uses
+ProxyController --> ResponseEntity : returns
+
+note as A
+  marco.mangan@pucrs.br
+  2024-11-14
+end note
+
+@enduml
