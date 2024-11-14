@@ -14,14 +14,15 @@ public class ProxyController {
 
     private static final String TARGET_SYSTEM_URL = "https://sarc.pucrs.br/Default/Export.aspx?id=%s&ano=%s&sem=%s";
 
-    @GetMapping("/forward/{id}")
-    public ResponseEntity<?> forwardRequest(@PathVariable String id) {
+    @GetMapping("/forward/{year}/{period}/{id}")
+    public ResponseEntity<?> forwardRequest(@PathVariable String year, @PathVariable String period,
+            @PathVariable String id) {
         // Forward the GET request to the target system
-        String year = "2024"; // FIXME: get current year?
-        String period = "2";
+        // String year = "2024"; // FIXME: get current year?
+        // String period = "2";
         ResponseEntity<String> response = restTemplate.getForEntity(String.format(TARGET_SYSTEM_URL, id, year, period),
                 String.class);
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
-    
+
 }

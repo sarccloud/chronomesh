@@ -33,7 +33,7 @@ public class ProxyControllerTest {
                 .thenReturn(new ResponseEntity<>(expectedResponseBody, HttpStatus.OK));
 
         // Perform GET request to /api/v1/forward/{id}
-        mockMvc.perform(get("/api/v1/forward/123"))
+        mockMvc.perform(get("/api/v1/forward/2024/2/123"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(expectedResponseBody));
     }
@@ -45,7 +45,7 @@ public class ProxyControllerTest {
                 .thenReturn(new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND));
 
         // Perform GET request to /api/v1/forward/{id}
-        mockMvc.perform(get("/api/v1/forward/999"))
+        mockMvc.perform(get("/api/v1/forward/2024/2/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Not Found"));
     }
