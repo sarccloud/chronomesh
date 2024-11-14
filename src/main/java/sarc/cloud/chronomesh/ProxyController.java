@@ -1,6 +1,5 @@
 package sarc.cloud.chronomesh;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +17,11 @@ public class ProxyController {
     @GetMapping("/forward/{id}")
     public ResponseEntity<?> forwardRequest(@PathVariable String id) {
         // Forward the GET request to the target system
-	String year = "2024"; // FIXME: get current year?
-	String period = "2";
-        ResponseEntity<String> response = restTemplate.getForEntity(String.format(TARGET_SYSTEM_URL, id, year, period), String.class);
+        String year = "2024"; // FIXME: get current year?
+        String period = "2";
+        ResponseEntity<String> response = restTemplate.getForEntity(String.format(TARGET_SYSTEM_URL, id, year, period),
+                String.class);
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
-
+    
 }

@@ -30,26 +30,24 @@ public class ProxyControllerTest {
         // Mock the RestTemplate response
         String expectedResponseBody = "Mocked response from target system";
         when(restTemplate.getForEntity(anyString(), Mockito.eq(String.class)))
-            .thenReturn(new ResponseEntity<>(expectedResponseBody, HttpStatus.OK));
+                .thenReturn(new ResponseEntity<>(expectedResponseBody, HttpStatus.OK));
 
-        // Perform GET request to /api/forward/{id}
+        // Perform GET request to /api/v1/forward/{id}
         mockMvc.perform(get("/api/v1/forward/123"))
-            .andExpect(status().isOk())
-            .andExpect(content().string(expectedResponseBody));
+                .andExpect(status().isOk())
+                .andExpect(content().string(expectedResponseBody));
     }
 
     @Test
     public void testForwardRequestNotFound() throws Exception {
         // Mock a 404 response from the target system
         when(restTemplate.getForEntity(anyString(), Mockito.eq(String.class)))
-            .thenReturn(new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND));
+                .thenReturn(new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND));
 
-        // Perform GET request to /api/forward/{id}
+        // Perform GET request to /api/v1/forward/{id}
         mockMvc.perform(get("/api/v1/forward/999"))
-            .andExpect(status().isNotFound())
-            .andExpect(content().string("Not Found"));
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Not Found"));
     }
-
-
 
 }
