@@ -1,9 +1,15 @@
 package sarc.cloud.chronomesh;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
 /**
  * ProxyController serves as a proxy to forward requests to a OpenSARC system.
@@ -39,6 +45,8 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/api/v1")
 public class ProxyController {
 
+    private static final Logger logger = Logger.getLogger(ProxyController.class.getName());
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -49,6 +57,15 @@ public class ProxyController {
     private static final String TARGET_SYSTEM_URL = "https://sarc.pucrs.br/Default/Export.aspx?id=%s&ano=%s&sem=%s";
 
     /**
+     * Known indicator for error page.
+     * 
+     * This is a possible point of failure in case OpenSARC changes the message.
+     * We choose to make this weak check, but maintain automatic redirects in order
+     * to avoid possible problems with proxies and firewalls.
+     */
+    private static final String ERROR_INDICATOR = "Codigo de turma inválido!"; // Known indicator for error page
+
+    /**
      * Forwards a GET request to OpenSARC based on the specified year,
      * period, and ID. Retrieves the response from the target system and returns
      * it to the original requester.
@@ -56,14 +73,58 @@ public class ProxyController {
      * @param year   the academic year parameter for the request
      * @param period the semester or period parameter for the request
      * @param id     the unique identifier for the specific class timetable
-     * @return ResponseEntity containing the response from OpenSARC
+     * @return ResponseEntity containing the response from OpenSARC or a 404 error if an error indicator is found
      */
     @GetMapping("/forward/{year}/{period}/{id}")
+    @CircuitBreaker(name = "openSarcCircuitBreaker", fallbackMethod = "handleOpenSarcError")
     public ResponseEntity<?> forwardRequest(@PathVariable String year, @PathVariable String period,
             @PathVariable String id) {
-        ResponseEntity<String> response = restTemplate.getForEntity(String.format(TARGET_SYSTEM_URL, id, year, period),
-                String.class);
+                logger.info(String.format("Initiating request to OpenSARC with year=%s, period=%s, id=%s", year, period, id));
+
+        ResponseEntity<String> response = restTemplate.getForEntity(
+                String.format(TARGET_SYSTEM_URL, id, year, period), String.class);
+
+        if (isErrorPage(response.getBody())) {
+            logger.warning(String.format("Detected redirect to Error.aspx for request with year=%s, period=%s, id=%s",
+                    year, period, id));
+
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Class timetable not found.");
+                }
+
+        logger.info(String.format("Successfully retrieved data for year=%s, period=%s, id=%s", year, period, id));
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+
+    }
+
+        /**
+     * Checks if the response body contains an error indicator message.
+     *
+     * @param responseBody the response body to check
+     * @return true if the response contains an error indicator, false otherwise
+     */
+    private boolean isErrorPage(String responseBody) {
+        return responseBody != null && responseBody.contains(ERROR_INDICATOR);
+    }
+
+    /**
+     * Fallback method for handling repeated Not Found redirects from OpenSARC.
+     * Returns a custom error message when the circuit breaker is open.
+     *
+     * @param year   the academic year parameter for the request
+     * @param period the semester or period parameter for the request
+     * @param id     the unique identifier for the specific resource in the target
+     *               system
+     * @param ex     the exception that triggered the fallback
+     * @return ResponseEntity containing a custom error message
+     */
+    public ResponseEntity<String> handleOpenSarcError(String year, String period, String id, Throwable ex) {
+        logger.log(Level.SEVERE,
+                String.format(
+                        "Circuit breaker fallback triggered for request with year={}, period={}, id={}. Reason: {}",
+                        year, period, id, ex.getMessage()),
+                ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("The requested timetable was not found or is temporarily unavailable.");
     }
 
 }
