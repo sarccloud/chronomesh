@@ -7,8 +7,13 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.servers.Server;
 
-@OpenAPIDefinition(servers = {
-        @Server(url = "https://improved-waddle-4p6w99xp4fjr49-8080.app.github.dev/") }, info = @Info(title = "the title", version = "v1", description = "My API", license = @License(name = "Apache 2.0", url = "http://foo.bar"), contact = @Contact(url = "http://gigantic-server.com", name = "Fred", email = "Fred@gigagantic-server.com")))
+@OpenAPIDefinition(
+        servers = {
+        @Server(url = "https://improved-waddle-4p6w99xp4fjr49-8080.app.github.dev/"),
+        @Server(url = "https://localhost:8080")}, 
+        info = @Info(title = "Chronomesh", version = "v1", description = "Chronomesh is a Proxy for OpenSARC", 
+        license = @License(name = "MIT License", url = "https://mit-license.org/"), 
+        contact = @Contact(url = "http://github.com/sarccloud", name = "Mangan", email = "marco.mangan@pucrs.br")))
 public class OpenApiConfig {
 
 }
