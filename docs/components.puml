@@ -12,7 +12,7 @@ package "Chronomesh System" {
 [ProxyController] --> [Cloudflare Service] : forwards requests
 [Cloudflare Service] --> [OpenSARC System] : accesses
 
-note bottom of [Chronomesh System]
+note as A
   Created by: marco.mangan@pucrs.br
 end note
 
