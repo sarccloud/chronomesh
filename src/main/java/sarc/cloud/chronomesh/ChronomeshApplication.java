@@ -2,6 +2,7 @@ package sarc.cloud.chronomesh;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
 /**
  * The main entry point for the Chronomesh application.
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author marco.mangan@gmail.com
  */
 @SpringBootApplication
+@EnableCaching
 public class ChronomeshApplication {
 
      /**
