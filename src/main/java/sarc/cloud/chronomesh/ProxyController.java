@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
  * https://<sarc
  * host>/Default/Export.aspx?id=b82f27a8-2f79-438e-add2-da55a58d2c89&ano=2024&sem=2
  * 
- * and the corresponding Chronomesh would be:
+ * and the corresponding Chronomesh URL would be:
  * http://<chronomesh
  * host>/api/v1/forward/2024/2/b82f27a8-2f79-438e-add2-da55a58d2c89
  *
@@ -77,6 +78,7 @@ public class ProxyController {
      */
     @GetMapping("/forward/{year}/{period}/{id}")
     @CircuitBreaker(name = "openSarcCircuitBreaker", fallbackMethod = "handleOpenSarcError")
+    @Cacheable(value = "classTimetableCache", key = "#year + '-' + #period + '-' + #id")
     public ResponseEntity<?> forwardRequest(@PathVariable String year, @PathVariable String period,
             @PathVariable String id) {
                 logger.info(String.format("Initiating request to OpenSARC with year=%s, period=%s, id=%s", year, period, id));
